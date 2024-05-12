@@ -26,8 +26,8 @@ export const createTask = async (req, res, next) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO task (title, description, user_id) VALUES ($1, $2, $3) RETURNING *",
-      [title, description, req.userId]
+      "INSERT INTO task (title, description, due_date, user_id) VALUES ($1, $2, $3, $4) RETURNING *",
+      [title, description, due_date, req.userId]
     );
 
     res.json(result.rows[0]);
@@ -43,11 +43,11 @@ export const createTask = async (req, res, next) => {
 
 export const updateTask = async (req, res) => {
   const id = req.params.id;
-  const { title, description } = req.body;
+  const { title, description, due_date} = req.body;
 
   const result = await pool.query(
-    "UPDATE task SET title = $1, description = $2 WHERE id = $3 RETURNING *",
-    [title, description, id]
+    "UPDATE task SET title = $1, description = $2, due_date = $3 WHERE id = $4 RETURNING *",
+    [title, description, due_date, id]
   );
 
   if (result.rowCount === 0) {
