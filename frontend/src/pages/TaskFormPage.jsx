@@ -1,68 +1,79 @@
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { Card, Input, Textarea, Label, Button } from "../components/ui";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
+import { useEffect } from "react";
 import { useTasks } from "../context/TaskContext";
 
-
 function TaskFormPage() {
-  const { register, handleSubmit, control, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm();
   const navigate = useNavigate();
-  const { createTask, updateTask, loadTask, setValue } = useTasks();
+  const { createTask, updateTask, loadTask, errors: tasksErrors } = useTasks();
   const params = useParams();
 
-  const onSubmit = data => {
-    const finalData = {
-      ...data,
-      due_date: data.due_date.toISOString().split('T')[0]  // Formatear la fecha a YYYY-MM-DD
-    };
+  const onSubmit = handleSubmit(async (data) => {
+    let task;
+
     if (!params.id) {
-      createTask(finalData).then(() => navigate("/tasks"));
+      task = await createTask(data);
     } else {
-      updateTask(params.id, finalData).then(() => navigate("/tasks"));
+      task = await updateTask(params.id, data)
     }
-  };
+
+    if (task) {
+      navigate("/tasks");
+    }
+  });
 
   useEffect(() => {
     if (params.id) {
-      loadTask(params.id).then(task => {
+      loadTask(params.id).then((task) => {
         setValue("title", task.title);
         setValue("description", task.description);
-        setValue("due_date", new Date(task.due_date));
       });
     }
-  }, [params.id, loadTask, setValue]);
+  }, []);
 
   return (
-    <Card>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Label htmlFor="title">Title</Label>
-        <Input id="title" {...register("title", { required: true })} />
-        {errors.title && <p className="text-red-500">Title is required</p>}
-
-        <Label htmlFor="description">Description</Label>
-        <Textarea id="description" {...register("description")} />
-
-        <Label htmlFor="due_date">Due Date</Label>
-        <Controller
-          control={control}
-          name="due_date"
-          render={({ field }) => (
-            <DatePicker
-              placeholderText="Select date"
-              onChange={(date) => field.onChange(date)}
-              selected={field.value}
-              dateFormat="yyyy-MM-dd"
-              className="input"
-            />
+    <div className="flex h-[80vh] justify-center items-center">
+      <Card>
+        {tasksErrors.map((error, i) => (
+          <p className="text-red-500" key={i}>
+            {error}
+          </p>
+        ))}
+        <h2 className="text-3xl font-bold my-4">
+          {params.id ? "Edit Task" : "Create Task"}
+        </h2>
+        <form onSubmit={onSubmit}>
+          <Label htmlFor="title">Title</Label>
+          <Input
+            type="text"
+            placeholder="Title"
+            autoFocus
+            {...register("title", {
+              required: true,
+            })}
+          />
+          {errors.title && (
+            <span className="text-red-500">Title is required</span>
           )}
-        />
 
-        <Button type="submit">{params.id ? "Update Task" : "Create Task"}</Button>
-      </form>
-    </Card>
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            placeholder="Description"
+            rows={3}
+            {...register("description")}
+          ></Textarea>
+
+          <Button>{params.id ? "Edit Task" : "Create Task"}</Button>
+        </form>
+      </Card>
+    </div>
   );
 }
 
