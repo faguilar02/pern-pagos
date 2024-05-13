@@ -71,6 +71,7 @@ function TaskFormPage() {
           <Label htmlFor="due_date">Fecha de vencimiento</Label>
           <input
             type="date"
+            className="bg-zinc-800 px-3 py-2 block my-2 w-full"
             min={new Date().toISOString().split("T")[0]}
             {...register("due_date")}
           />
