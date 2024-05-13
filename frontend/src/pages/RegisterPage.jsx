@@ -26,10 +26,10 @@ function RegisterPage() {
             <p className="bg-red-500 text-white p-2 text-center">{err}</p>
           ))}
 
-        <h3 className="text-2xl font-bold">Register</h3>
+        <h3 className="text-2xl font-bold text-center mb-2">Registro</h3>
 
         <form onSubmit={onSubmit}>
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name">Nombre</Label>
           <Input
             placeholder="Enter your fullname"
             {...register("name", {
@@ -37,7 +37,7 @@ function RegisterPage() {
             })}
           />
 
-          {errors.name && <p className="text-red-500">name is required</p>}
+          {errors.name && <p className="text-red-500">El nombre es obligatorio</p>}
 
           <Label htmlFor="email">Email</Label>
           <Input
@@ -47,9 +47,9 @@ function RegisterPage() {
               required: true,
             })}
           />
-          {errors.email && <p className="text-red-500">email is required</p>}
+          {errors.email && <p className="text-red-500">El email es obligatorio</p>}
 
-          <Label htmlFor="password">Password</Label>
+          <Label htmlFor="password">Contraseña</Label>
           <Input
             type="password"
             placeholder="Enter your password"
@@ -58,13 +58,13 @@ function RegisterPage() {
             })}
           />
           {errors.password && (
-            <p className="text-red-500">password is required</p>
+            <p className="text-red-500">La contraseña es obligatoria</p>
           )}
-
-          <Button>Register</Button>
+          <div className="flex justify-center mt-3"><Button>Registrarse</Button></div>
+        
 
           <div className="flex justify-between my-4">
-            <p className="mr-4">Already have an account?</p>
+            <p className="mr-4">Ya tienes una cuenta?</p>
             <Link to="/login" className="font-bold">
               Login
             </Link>

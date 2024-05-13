@@ -11,25 +11,20 @@ export const publicRoutes = [
     path: "/login",
   },
   {
-    name: "Register",
+    name: "Registro",
     path: "/register",
   },
 ]
 
 export const privateRoutes = [
   {
-    name: "Tasks",
+    name: "Pagos",
     path: "/tasks",
     icon: <BiTask className='w-5 h-5' />,
   },
   {
-    name: "Add",
+    name: "Agregar",
     path: "/tasks/new",
     icon: <MdTaskAlt className='w-5 h-5' />,
-  },
-  {
-    name: "Profile",
-    path: "/profile",
-    icon: <BiUserCircle className='w-5 h-5' />,
   },
 ];
