@@ -1,79 +1,89 @@
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTasks } from "../context/TaskContext";
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { Card, Input, Textarea, Label, Button } from "../components/ui";
 
 function TaskFormPage() {
   const {
     register,
     handleSubmit,
-    control,
-    formState: { errors },
     setValue,
+    formState: { errors },
   } = useForm();
   const navigate = useNavigate();
-  const { createTask, updateTask, loadTask, errors: tasksErrors } = useTasks();
-  const params = useParams();
+  const { createTask, updateTask, loadTask } = useTasks();
+  const { id } = useParams();
 
+  // Manejo del submit
   const onSubmit = async (data) => {
-    const finalData = {
-      ...data,
-      due_date: data.due_date.toISOString().split('T')[0]  // Formatear la fecha a YYYY-MM-DD
-    };
-    if (!params.id) {
-      await createTask(finalData);
-    } else {
-      await updateTask(params.id, finalData);
+    try {
+      // Asegurarse de que la fecha se envía en el formato correcto
+      const finalData = {
+        ...data,
+        due_date: data.due_date || null, // Tomar directamente el valor del input date
+      };
+      if (!id) {
+        await createTask(finalData);
+      } else {
+        await updateTask(id, finalData);
+      }
+      navigate("/tasks");
+    } catch (error) {
+      console.error("Error saving task:", error);
     }
-    navigate("/tasks");
   };
 
+  // Cargar datos de la tarea para editar
   useEffect(() => {
-    if (params.id) {
-      loadTask(params.id).then((task) => {
+    if (id) {
+      loadTask(id).then((task) => {
         setValue("title", task.title);
         setValue("description", task.description);
-        setValue("due_date", new Date(task.due_date));
+        // Asegurarse de que la fecha está en el formato correcto para el input de tipo date.
+        const formattedDate = task.due_date
+          ? new Date(task.due_date).toISOString().split("T")[0]
+          : "";
+        setValue("due_date", formattedDate);
       });
     }
-  }, [params.id, setValue, loadTask]);
+  }, [id, setValue, loadTask]);
 
   return (
     <div className="flex h-[80vh] justify-center items-center">
       <Card>
-        {tasksErrors.map((error, i) => (
-          <p className="text-red-500" key={i}>{error}</p>
-        ))}
         <h2 className="text-3xl font-bold my-4">
-          {params.id ? "Edit Task" : "Create Task"}
+          {id ? "Edit Task" : "Create Task"}
         </h2>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <Label htmlFor="title">Title</Label>
-          <Input id="title" {...register("title", { required: true })} />
-          {errors.title && <span className="text-red-500">Title is required</span>}
+          <Input
+            id="title"
+            {...register("title", { required: "Title is required" })}
+          />
+          {errors.title && (
+            <span className="text-red-500">{errors.title.message}</span>
+          )}
 
           <Label htmlFor="description">Description</Label>
           <Textarea id="description" {...register("description")} />
 
-          <Label htmlFor="due_date">Due Date</Label>
-          <Controller
-            name="due_date"
-            control={control}
-            render={({ field }) => (
-              <DatePicker
-                placeholderText="Select date"
-                onChange={(date) => field.onChange(date)}
-                selected={field.value}
-                dateFormat="yyyy-MM-dd"
-                className="input"
-              />
-            )}
+          <Label htmlFor="due_date">Fecha de vencimiento</Label>
+          <input
+            type="date"
+            min={new Date().toISOString().split("T")[0]}
+            {...register("due_date")}
           />
-          {errors.due_date && (<span className="text-red-500">Date is required</span> )}
-          <Button type="submit">{params.id ? "Edit Task" : "Create Task"}</Button>
+
+          {errors.due_date && (
+            <span className="text-red-500">{errors.due_date.message}</span>
+          )}
+
+          <div className="flex justify-end">
+            {" "}
+            {/* Añadido para alinear el botón a la derecha */}
+            <Button type="submit">{id ? "Edit Task" : "Create Task"}</Button>
+          </div>
         </form>
       </Card>
     </div>
